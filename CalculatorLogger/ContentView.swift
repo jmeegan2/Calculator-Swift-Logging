@@ -19,10 +19,18 @@ struct ContentView: View {
     @State var storedNumber: Double = 0
     @State var storedOperation: String = ""
     @State var previousCalculations: [String] = []
+    @State private var calculationLog = ""
+    @State var currentFunction: String = "" // added state variable for current function
+
     
     var body: some View {
         
         VStack(spacing: 12) {
+            Text(currentFunction)
+                .font(.headline)
+                .multilineTextAlignment(.trailing)
+                .padding(.horizontal)
+            
             // Previous calculations view
             // Current number display
             Spacer()
@@ -58,6 +66,19 @@ struct ContentView: View {
     }
     
     
+//    func addToCalculationLog(_ button: String) {
+//        switch button {
+//        case "C":
+//            calculationLog = ""
+//        case "+", "-", "x", "÷":
+//            calculationLog = "\(currentNumber) \(button) " + calculationLog
+//        case "=":
+//            calculationLog = "\(currentNumber) = " + calculationLog
+//        default:
+//            calculationLog = button + calculationLog
+//        }
+//    }
+    
     func buttonTapped(_ button: String) {
         if let number = Double(button) {
             if currentNumber == "0" {
@@ -65,15 +86,20 @@ struct ContentView: View {
             } else {
                 currentNumber += button
             }
+            // Append the number to the current function string
+            currentFunction += button
         } else if button == "." {
             if !currentNumber.contains(".") {
                 currentNumber += "."
+                // Append the dot to the current function string
+                currentFunction += "."
             }
         } else if button == "C" {
             currentNumber = "0"
             storedNumber = 0
             storedOperation = ""
             previousCalculations.removeAll()
+            currentFunction = "" // clear current function on clear
         } else if let operation = button.first {
             if storedOperation.isEmpty {
                 storedNumber = Double(currentNumber) ?? 0
@@ -82,11 +108,14 @@ struct ContentView: View {
                 performCalculation()
             }
             storedOperation = String(operation)
+            // Append the operation to the current function string
+            currentFunction += " \(storedOperation) "
         } else if button == "=" {
             performCalculation()
+            // Append the current result to the current function string
         }
-        updatePreviousCalculations()
     }
+
     
     func performCalculation() {
         if let operation = storedOperation.first {
@@ -105,14 +134,9 @@ struct ContentView: View {
         }
         currentNumber = String(storedNumber)
         storedOperation = ""
+        currentFunction += " = \(currentNumber)" // add calculation result to
     }
-    
-    func updatePreviousCalculations() {
-        if let operation = storedOperation.first {
-            let calculation = "\(storedNumber) \(operation) \(currentNumber) = "
-            previousCalculations.append(calculation)
-        }
-    }
+
 }
 
 
